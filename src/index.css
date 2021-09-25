@@ -17,7 +17,23 @@ body {
   margin: 20px;
 }
 
-ol, ul {
+button {
+  box-sizing: border-box;
+  border: none;
+  background: #c0c0c0;
+  box-shadow: inset -1px -1px #0a0a0a, inset 1px 1px #ffffff,
+    inset -2px -2px #808080, inset 2px 2px #dfdfdf;
+  border-radius: 0;
+}
+
+button:not(:disabled):active {
+  box-shadow: inset -1px -1px #ffffff,
+  inset 1px 1px #0a0a0a, inset -2px -2px #dfdfdf,
+  inset 2px 2px #808080;
+}
+
+ol,
+ul {
   padding-left: 30px;
 }
 
@@ -32,15 +48,15 @@ ol, ul {
 }
 
 .square {
-  background: #fff;
-  border: 1px solid #999;
+  /* background: #fff; */
+  /* border: 1px solid #999; */
   float: left;
   font-size: 24px;
   font-weight: bold;
   line-height: 34px;
   height: 34px;
-  margin-right: -1px;
-  margin-top: -1px;
+  /* margin-right: -1px;
+  margin-top: -1px; */
   padding: 0;
   text-align: center;
   width: 34px;

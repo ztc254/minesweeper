@@ -4,8 +4,13 @@ import { mineMap } from "./mineMap";
 function SingleMine(props) {
   // Todo: learn to insert a pic
   return (
-    <button className="square" onClick={props.onClick}>
-      {props.state ? props.value ? props.value : '' : "X"}
+    <button
+      className="square"
+      onClick={props.onClick}
+      onContextMenu={props.onContextMenu}
+      onMouseUp={props.onMouseUp}
+    >
+      {props.state ? (props.value ? props.value : "") : "X"}
     </button>
   );
 }
@@ -24,6 +29,11 @@ class Mines extends React.Component {
       // States: 0: covered; 1: revealed; 2: flagged
       ended: 0,
     };
+  }
+
+  handleAllClicks(event) {
+    event.preventDefault();
+    console.log(event.button);
   }
 
   getNearbySquares(row, col) {
@@ -97,6 +107,9 @@ class Mines extends React.Component {
                 state={this.state.reveal[i][j]}
                 value={value}
                 onClick={() => this.handleOnClick(i, j)}
+                onContextMenu={this.handleAllClicks}
+                onMouseUp={this.handleAllClicks}
+                onMouseDown={this.handleAllClicks}
                 key={i + "-" + j}
               />
             ));
