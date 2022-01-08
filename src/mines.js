@@ -1,16 +1,30 @@
+/*
+Todos:
+1. Edit css to fix animations
+2. Improve logic for all clicks
+3. Add header: S/M/L, mines left, timer
+4. Add game end check
+ */
+
 import React from "react";
 import { mineMap } from "./mineMap";
 
 function SingleMine(props) {
-  // Todo: learn to insert a pic
   return (
     <button
       className="square"
       onClick={props.onClick}
       onContextMenu={props.onContextMenu}
-      onMouseUp={props.onMouseUp}
+      /* onMouseUp={props.onMouseUp} */
+      style={props.state === 2 ? { color: "red" } : {}}
     >
-      {props.state ? (props.value ? props.value : "") : "X"}
+      {props.state === 2
+        ? "\u2691"
+        : props.state
+        ? props.value
+          ? props.value
+          : ""
+        : ""}
     </button>
   );
 }
@@ -31,10 +45,25 @@ class Mines extends React.Component {
     };
   }
 
-  handleAllClicks(event) {
+  handleRightClick(event, row, col) {
     event.preventDefault();
-    console.log(event.button);
+    if (this.state.reveal[row][col] === 0 || this.state.reveal[row][col] === 2) {
+      this.tempState = [...this.state.reveal];
+      this.tempState[row][col] = this.tempState[row][col] === 0 ? 2 : 0;
+      this.setState({ reveal: this.tempState });
+    }
   }
+
+  handleOnClick(event, row, col) {
+    if (this.state.ended || this.state.reveal[row][col] !== 0) {
+      return;
+    }
+    this.revealAllNearbySquares(row, col);
+  }
+
+  /* handleAllClicks(event) {
+    console.log(event.button);
+  } */
 
   getNearbySquares(row, col) {
     const directions = [
@@ -90,13 +119,6 @@ class Mines extends React.Component {
     this.setState({ reveal: this.tempState });
   }
 
-  handleOnClick(row, col) {
-    if (this.state.ended) {
-      return;
-    }
-    this.revealAllNearbySquares(row, col);
-  }
-
   render() {
     return this.mineMap.map((mMapRows, i) => {
       return (
@@ -106,10 +128,10 @@ class Mines extends React.Component {
               <SingleMine
                 state={this.state.reveal[i][j]}
                 value={value}
-                onClick={() => this.handleOnClick(i, j)}
-                onContextMenu={this.handleAllClicks}
-                onMouseUp={this.handleAllClicks}
-                onMouseDown={this.handleAllClicks}
+                onClick={(e) => this.handleOnClick(e, i, j)}
+                onContextMenu={(e) => this.handleRightClick(e, i, j)}
+                /* onMouseUp={this.handleAllClicks}
+                onMouseDown={this.handleAllClicks} */
                 key={i + "-" + j}
               />
             ));
