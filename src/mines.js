@@ -1,7 +1,7 @@
 /*
 Todos:
 1. Edit css to fix animations
-2. Improve logic for all clicks
+2. Improve logic for all clicks - Convert double click logic to left+right logic
 3. Add header: S/M/L, mines left, timer
 4. Add game end check
  */
@@ -15,6 +15,7 @@ function SingleMine(props) {
       className="square"
       onClick={props.onClick}
       onContextMenu={props.onContextMenu}
+      onDoubleClick={props.onDoubleClick}
       /* onMouseUp={props.onMouseUp} */
       style={props.state === 2 ? { color: "red" } : {}}
     >
@@ -47,7 +48,10 @@ class Mines extends React.Component {
 
   handleRightClick(event, row, col) {
     event.preventDefault();
-    if (this.state.reveal[row][col] === 0 || this.state.reveal[row][col] === 2) {
+    if (
+      this.state.reveal[row][col] === 0 ||
+      this.state.reveal[row][col] === 2
+    ) {
       this.tempState = [...this.state.reveal];
       this.tempState[row][col] = this.tempState[row][col] === 0 ? 2 : 0;
       this.setState({ reveal: this.tempState });
@@ -58,7 +62,29 @@ class Mines extends React.Component {
     if (this.state.ended || this.state.reveal[row][col] !== 0) {
       return;
     }
-    this.revealAllNearbySquares(row, col);
+    this.revealSquares(row, col);
+  }
+
+  handleDoubleClick(event, row, col) {
+    if (this.state.ended || this.state.reveal[row][col] !== 1 || this.mineMap[row][col] < 1) {
+      return;
+    }
+    const neighbors = this.getNearbySquares(row, col);
+
+    let flagCount = 0;
+    for (let [nbRow, nbCol] of neighbors) {
+      if (this.state.reveal[nbRow][nbCol] === 2) {
+        ++flagCount;
+      }
+    }
+
+    if (this.mineMap[row][col] === flagCount) {
+      for (let [nbRow, nbCol] of neighbors) {
+        if (this.state.reveal[nbRow][nbCol] === 0) {
+          this.revealSquares(nbRow, nbCol);
+        }
+      }
+    }
   }
 
   /* handleAllClicks(event) {
@@ -94,7 +120,8 @@ class Mines extends React.Component {
   recursiveReveal(row, col) {
     this.tempState[row][col] = 1;
     if (this.mineMap[row][col] !== 0) {
-      return this.mineMap[row][col] === -1 ? 0 : 1;
+      // If is mine, return false
+      return this.mineMap[row][col] === -1 ? false : true;
     }
 
     const availableSquares = this.getNearbySquares(row, col).filter(
@@ -105,13 +132,14 @@ class Mines extends React.Component {
         this.mineMap[s[0]][s[1]] === -1 ||
         this.recursiveReveal(s[0], s[1], this.tempState) === 0
       ) {
-        return 0;
+        // If is mine, return false
+        return false;
       }
     }
-    return 1;
+    return true;
   }
 
-  revealAllNearbySquares(row, col) {
+  revealSquares(row, col) {
     this.tempState = [...this.state.reveal];
     if (!this.recursiveReveal(row, col)) {
       this.setState({ ended: 1 });
@@ -130,6 +158,7 @@ class Mines extends React.Component {
                 value={value}
                 onClick={(e) => this.handleOnClick(e, i, j)}
                 onContextMenu={(e) => this.handleRightClick(e, i, j)}
+                onDoubleClick={(e) => this.handleDoubleClick(e, i, j)}
                 /* onMouseUp={this.handleAllClicks}
                 onMouseDown={this.handleAllClicks} */
                 key={i + "-" + j}
